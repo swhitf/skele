@@ -85,9 +85,15 @@
     <Compile Include="Interop\DatabaseSession.cs" />
     <Compile Include="Interop\ObjectDescriptor.cs" />
     <Compile Include="Interop\ObjectDescriptorCollection.cs" />
+    <Compile Include="Interop\SqlDialect.cs" />
+    <Compile Include="Interop\SqlGenerator.cs" />
+    <Compile Include="Interop\SqlInsertBuilder.cs" />
     <Compile Include="Interop\SqlServer\MetadataFactory.cs" />
+    <Compile Include="Interop\SqlBuilder.cs" />
     <Compile Include="Interop\SqlServer\SqlServerDriver.cs" />
     <Compile Include="Interop\SqlServer\SqlServerSession.cs" />
+    <Compile Include="Interop\SqlServer\SqlServerSqlDialect.cs" />
+    <Compile Include="Interop\SqlServer\SqlServerSqlBuilder.cs" />
     <Compile Include="Interop\SqlServer\TypeMappings.cs" />
     <Compile Include="Interop\TableDescriptor.cs" />
     <Compile Include="Migration\DefaultMigrationStrategy.cs" />
@@ -103,6 +109,8 @@
     <Compile Include="Migration\MigrationPlan.cs" />
     <Compile Include="Migration\Package.cs" />
     <Compile Include="Migration\PackageFactory.cs" />
+    <Compile Include="Migration\RefreshCommand.cs" />
+    <Compile Include="Migration\RefreshCommandHandler.cs" />
     <Compile Include="Migration\Resource.cs" />
     <Compile Include="Migration\StructuredPackage.cs" />
     <Compile Include="Program.cs" />

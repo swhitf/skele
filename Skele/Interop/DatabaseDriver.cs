@@ -11,6 +11,8 @@ namespace Skele.Interop
     /// </summary>
     public abstract class DatabaseDriver
     {
+        public abstract SqlBuilder CreateSqlBuilder();
+
         public abstract DatabaseSession Create(string databaseName);
 
         public abstract DatabaseDescriptor Describe(string databaseName);

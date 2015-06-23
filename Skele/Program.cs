@@ -30,7 +30,7 @@ namespace Skele
 
             var dispatcher = new DefaultCommandDispatcher();
             dispatcher.Register(new InitCommandHandler(driver));
-            dispatcher.Register(new ExecuteCommandHandler());
+            dispatcher.Register(new ExecuteCommandHandler(driver));
             dispatcher.Register(new ExportCommandHandler());
             dispatcher.Register(new MigrateCommandHandler(driver));
 

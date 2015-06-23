@@ -13,7 +13,7 @@ namespace Skele.Interop.SqlServer
 
         public SqlServerDriver()
         {
-            server = new Server("STEPHEN-LAPTOP");
+            server = new Server("STEPHEN-PC\\SQLEXPRESS");
         }
 
         public override DatabaseSession Create(string databaseName)
@@ -55,6 +55,11 @@ namespace Skele.Interop.SqlServer
         public override bool Exists(string databaseName)
         {
             return server.Databases.Contains(databaseName);
+        }
+
+        public override SqlBuilder CreateSqlBuilder()
+        {
+            return new SqlServerSqlBuilder();
         }
     }
 }

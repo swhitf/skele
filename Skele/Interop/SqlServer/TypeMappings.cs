@@ -38,6 +38,7 @@ namespace Skele.Interop.SqlServer
                 case SqlDataType.Image:
                 case SqlDataType.Timestamp:
                 case SqlDataType.VarBinary:
+                case SqlDataType.VarBinaryMax:
                     return typeof(byte[]);
 
                 case SqlDataType.Bit:
@@ -47,8 +48,10 @@ namespace Skele.Interop.SqlServer
                 case SqlDataType.NChar:
                 case SqlDataType.NText:
                 case SqlDataType.NVarChar:
+                case SqlDataType.NVarCharMax:
                 case SqlDataType.Text:
                 case SqlDataType.VarChar:
+                case SqlDataType.VarCharMax:
                 case SqlDataType.Xml:
                     return typeof(string);
 
