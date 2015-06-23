@@ -4,14 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Skele.Migrations
+namespace Skele.Migration
 {
-    class MigrationPlan : IEnumerable<Migration>
+    class MigrationPlan : IEnumerable<MigrationStep>
     {
-        public MigrationPlan(Version sourceVersion, IEnumerable<Migration> migrations)
+        public MigrationPlan(Version sourceVersion, IEnumerable<MigrationStep> migrations)
         {
-            SourceVersion = sourceVersion;
             Migrations = migrations.ToList();
+            SourceVersion = sourceVersion;
+            TargetVersion = migrations.Max(x => x.Target);
         }
 
         public Version SourceVersion
@@ -26,13 +27,13 @@ namespace Skele.Migrations
             private set;
         }
 
-        public IReadOnlyList<Migration> Migrations
+        public IReadOnlyList<MigrationStep> Migrations
         {
             get;
             private set;
         }
 
-        public IEnumerator<Migration> GetEnumerator()
+        public IEnumerator<MigrationStep> GetEnumerator()
         {
             return Migrations.GetEnumerator();
         }

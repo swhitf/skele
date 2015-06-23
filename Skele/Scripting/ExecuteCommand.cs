@@ -1,15 +1,18 @@
 ﻿using Skele.Core;
-using Skele.Interop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Skele.Migrations
+namespace Skele.Scripting
 {
-    public class InitCommand : ICommand
+    class ExecuteCommand : ICommand
     {
-        
+        public string FilePath
+        {
+            get;
+            set;
+        }
     }
 }

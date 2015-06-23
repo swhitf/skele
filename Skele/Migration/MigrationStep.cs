@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Skele.Migrations
+namespace Skele.Migration
 {
-    public class Migration : List<Resource>
+    public class MigrationStep : List<Resource>
     {
-        public Migration(Version target)
+        public MigrationStep(Version target)
 	    {
             Target = target;
 	    }

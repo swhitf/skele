@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Jint">
+      <HintPath>..\packages\Jint.2.5.0\lib\portable-net40+sl50+win+wpa81+wp80\Jint.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.SqlServer.ConnectionInfo, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <Private>True</Private>
       <HintPath>..\packages\Unofficial.Microsoft.SQLServer.SMO.2014.12.0.2000.8\lib\Microsoft.SqlServer.ConnectionInfo.dll</HintPath>
@@ -74,7 +77,7 @@
     <Compile Include="Core\ICommand.cs" />
     <Compile Include="Core\ICommandDispatcher.cs" />
     <Compile Include="Core\ICommandHandler.cs" />
-    <Compile Include="Input\InputMapper.cs" />
+    <Compile Include="Core\InputMapper.cs" />
     <Compile Include="Interop\ColumnDescriptor.cs" />
     <Compile Include="Interop\DatabaseDescriptor.cs" />
     <Compile Include="Interop\DatabaseDriver.cs" />
@@ -87,23 +90,26 @@
     <Compile Include="Interop\SqlServer\SqlServerSession.cs" />
     <Compile Include="Interop\SqlServer\TypeMappings.cs" />
     <Compile Include="Interop\TableDescriptor.cs" />
-    <Compile Include="Migrations\DefaultMigrationStrategy.cs" />
-    <Compile Include="Migrations\DirectoryPackage.cs" />
-    <Compile Include="Migrations\ExportCommand.cs" />
-    <Compile Include="Migrations\ExportCommandHandler.cs" />
-    <Compile Include="Migrations\IMigrationStrategy.cs" />
-    <Compile Include="Migrations\InitCommandHandler.cs" />
-    <Compile Include="Migrations\InitCommand.cs" />
-    <Compile Include="Migrations\MigrateCommandHandler.cs" />
-    <Compile Include="Migrations\MigrateCommand.cs" />
-    <Compile Include="Migrations\Migration.cs" />
-    <Compile Include="Migrations\MigrationPlan.cs" />
-    <Compile Include="Migrations\Package.cs" />
-    <Compile Include="Migrations\PackageFactory.cs" />
-    <Compile Include="Migrations\Resource.cs" />
-    <Compile Include="Migrations\StructuredPackage.cs" />
+    <Compile Include="Migration\DefaultMigrationStrategy.cs" />
+    <Compile Include="Migration\DirectoryPackage.cs" />
+    <Compile Include="Migration\ExportCommand.cs" />
+    <Compile Include="Migration\ExportCommandHandler.cs" />
+    <Compile Include="Migration\IMigrationStrategy.cs" />
+    <Compile Include="Migration\InitCommandHandler.cs" />
+    <Compile Include="Migration\InitCommand.cs" />
+    <Compile Include="Migration\MigrateCommandHandler.cs" />
+    <Compile Include="Migration\MigrateCommand.cs" />
+    <Compile Include="Migration\MigrationStep.cs" />
+    <Compile Include="Migration\MigrationPlan.cs" />
+    <Compile Include="Migration\Package.cs" />
+    <Compile Include="Migration\PackageFactory.cs" />
+    <Compile Include="Migration\Resource.cs" />
+    <Compile Include="Migration\StructuredPackage.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scripting\ExecuteCommandHandler.cs" />
+    <Compile Include="Scripting\ExecuteCommand.cs" />
+    <Compile Include="Scripting\TableAdapter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

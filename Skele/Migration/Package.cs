@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Skele.Migrations
+namespace Skele.Migration
 {
     public abstract class Package
     {
@@ -13,6 +13,6 @@ namespace Skele.Migrations
             get;
         }
 
-        public abstract IReadOnlyList<Migration> GetMigrations();
+        public abstract IReadOnlyList<MigrationStep> GetMigrations();
     }
 }

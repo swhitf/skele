@@ -5,21 +5,28 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Skele.Input
+namespace Skele.Core
 {
     class InputMapper
     {
         private Dictionary<string, MappingBase> mappings;
 
+        public InputMapper(ICommandDispatcher dispatcher)
+        {
+            this.dispatcher = dispatcher;
+
+            mappings = new Dictionary<string, MappingBase>();
+        }
+
         public IMapping<T> Map<T>(string command) where T : ICommand, new()
         {
-            var m = new MappingImpl<T>();
+            var m = new MappingImpl<T>(dispatcher);
             mappings.Add(command, m);
 
             return m;
         }
 
-        public ICommand Parse(string[] args)
+        public void Process(string[] args)
         {
             if (args == null || args.Length == 0)
             {
@@ -28,8 +35,8 @@ namespace Skele.Input
 
             if (mappings.ContainsKey(args[0]))
             {
-                return mappings[args[0]].CreateCommand(
-                    args.Skip(1).ToArray());
+                mappings[args[0]].CreateAndExecute(
+                   args.Skip(1).ToArray());
             }
 
             throw new InvalidOperationException(string.Format("Unrecognized command: {0}", args[0]));
@@ -37,7 +44,7 @@ namespace Skele.Input
 
         private abstract class MappingBase
         {
-            public abstract ICommand CreateCommand(string[] args);
+            public abstract void CreateAndExecute(string[] args);
         }
 
         private class MappingImpl<T> : MappingBase, IMapping<T> where T : ICommand, new()
@@ -47,14 +54,16 @@ namespace Skele.Input
             private Func<T> factory;
             private Action<T> initializer;
 
-            public MappingImpl()
+            public MappingImpl(ICommandDispatcher dispatcher)
             {
+                this.dispatcher = dispatcher;
+
                 args = new Dictionary<string, Action<T, string>>();
                 switches = new Dictionary<string, Action<T>>();
                 factory = () => new T();
             }
 
-            public override ICommand CreateCommand(string[] args)
+            public override void CreateAndExecute(string[] args)
             {
                 var command = factory();
 
@@ -81,7 +90,7 @@ namespace Skele.Input
                     }
                 }
 
-                return command;
+                dispatcher.Dispatch(command);
             }
 
             private void TriggerSwitch(T command, string name)
@@ -124,6 +133,8 @@ namespace Skele.Input
                 this.initializer = initializer;
                 return this;
             }
+
+            public ICommandDispatcher dispatcher { get; set; }
         }
 
         public interface IMapping<T> where T : ICommand
@@ -136,5 +147,7 @@ namespace Skele.Input
 
             IMapping<T> Switch(string code, Action<T> setter);
         }
+
+        public ICommandDispatcher dispatcher { get; set; }
     }
 }

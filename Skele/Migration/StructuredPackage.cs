@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Skele.Migrations
+namespace Skele.Migration
 {
     public abstract partial class StructuredPackage : Package
     {
@@ -12,10 +12,10 @@ namespace Skele.Migrations
 
         protected abstract Resource CreateResource(Node node);
 
-        public override IReadOnlyList<Migration> GetMigrations()
+        public override IReadOnlyList<MigrationStep> GetMigrations()
         {
             var migsRoot = TryGetSection("Migrations");
-            var results = new List<Migration>();
+            var results = new List<MigrationStep>();
 
             foreach (var migrNode in migsRoot)
             {
@@ -23,7 +23,7 @@ namespace Skele.Migrations
                 if (!Version.TryParse(migrNode.Name, out version))
                     continue;
 
-                var migration = new Migration(version);
+                var migration = new MigrationStep(version);
                 migration.AddRange(migrNode.GetResources());
 
                 results.Add(migration);

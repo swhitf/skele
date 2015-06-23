@@ -18,7 +18,7 @@ namespace Skele.Core
         public void Register<T>(ICommandHandler<T> handler)
             where T : ICommand
         {
-            handlers.Add(typeof(T), handlers);
+            handlers.Add(typeof(T), handler);
         }
 
         public void Dispatch<T>(T command) where T : ICommand
@@ -27,7 +27,7 @@ namespace Skele.Core
 
             if (handlers.ContainsKey(type))
             {
-                var handler = handlers[type] as ICommandHandler<T>;
+                var handler = (ICommandHandler<T>)handlers[type];
 
                 if (handler == null)
                 {
