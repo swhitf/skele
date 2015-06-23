@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Skele.Interop;
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
@@ -9,19 +10,16 @@ namespace Skele.Scripting
 {
     class TableAdapter
     {
-        public void clear()
-        {
+        private TableDescriptor table;
 
+        public TableAdapter(TableDescriptor table)
+        {
+            this.table = table;
         }
 
         public void add(IDictionary<string, Object> data)
         {
-
-        }
-
-        public void batch(int count, dynamic factory)
-        {
-
+            throw new NotImplementedException();
         }
     }
 }

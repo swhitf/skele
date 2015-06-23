@@ -13,8 +13,6 @@ namespace Skele.Interop
     {
         public abstract DatabaseSession Create(string databaseName);
 
-        public abstract DatabaseDescriptor Describe(string databaseName);
-
         public abstract bool Exists(string databaseName);
 
         public abstract IEnumerable<string> List();
