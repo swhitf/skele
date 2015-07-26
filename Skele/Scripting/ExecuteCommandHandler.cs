@@ -12,23 +12,25 @@ namespace Skele.Scripting
 {
     class ExecuteCommandHandler : CommandHandlerBase<ExecuteCommand>
     {
-        private DatabaseDriver driver;
 
-        public ExecuteCommandHandler(DatabaseDriver driver)
+        public ExecuteCommandHandler(ICommandContext context)
+            : base(context)
         {
-            this.driver = driver;
         }
 
-        public override void Execute(ExecuteCommand input)
+        public override int Execute(ExecuteCommand input)
         {
-            var session = driver.Open("Katana");
+            var session = GetDatabaseSession();
             var metadata = session.Describe();
-
             var engine = new Engine();
-            AddTableAdapters(engine, metadata.Tables);
+
+            foreach (var table in metadata.Tables)
+            {
+                engine.SetValue(table.Name, new TableAdapter(engine, session, table));
+            }
 
             var source = File.ReadAllText(input.FilePath);
-            
+            engine.Execute(source);
 
             //Jint.Runtime.Interop.DefaultTypeConverter
             //var engine = new Engine();
@@ -37,14 +39,8 @@ namespace Skele.Scripting
             //    .Execute("1 + 1")
             //    .GetCompletionValue()
             //    .AsNumber();
-        }
 
-        private void AddTableAdapters(Engine engine, IEnumerable<TableDescriptor> tables)
-        {
-            foreach (var t in tables)
-            {
-                engine.SetValue(t.Name, new TableAdapter(t));
-            }
+            return SuccessResult();
         }
     }
 }

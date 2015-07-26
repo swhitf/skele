@@ -1,113 +1,181 @@
-﻿using System;
+﻿using Skele.Interop.MetaModel;
+using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.SqlServer.Management.Smo;
-using IDataReader = System.Data.IDataReader;
-using DataTable = System.Data.DataTable;
-using DataRow = System.Data.DataRow;
-using DataColumn = System.Data.DataColumn;
-using System.ComponentModel;
-
+using SmoConnection = Microsoft.SqlServer.Management.Common.ServerConnection;
+using SmoServer = Microsoft.SqlServer.Management.Smo.Server;
+using SmoDatabase = Microsoft.SqlServer.Management.Smo.Database;
+using SmoTable = Microsoft.SqlServer.Management.Smo.Table;
+using SmoColumn = Microsoft.SqlServer.Management.Smo.Column;
+using SmoDataType = Microsoft.SqlServer.Management.Smo.DataType;
+using Skele.Interop.Mapping;
+using Skele.Interop.Sql;
 
 namespace Skele.Interop.SqlServer
 {
-    class SqlServerSession : DatabaseSession
+    class SqlServerSession : IDatabaseSession
     {
-        private Database database;
+        private string databaseName;
+        private string connString;
 
-        public SqlServerSession(Database database)
+        public SqlServerSession(string databaseName, string connString)
         {
-            this.database = database;
+            this.databaseName = databaseName;
+            this.connString = connString;
         }
 
-        public override void CreateTable(TableDescriptor tableSpec)
+        public SqlBuilder Build()
         {
-            var table = new Table(database, tableSpec.Name);
+            return new SqlBuilder(new SqlServerDialect());
+        }
 
-            foreach (var columnSpec in tableSpec.Columns)
+        public void CreateTable(TableDescriptor tableSpec)
+        {
+            WithSmo(database =>
             {
-                var type = columnSpec.Length.HasValue
-                    ? new DataType(TypeMappings.GetSmoType(columnSpec.DataType), columnSpec.Length.Value)
-                    : new DataType(TypeMappings.GetSmoType(columnSpec.DataType));
+                var table = new SmoTable(database, tableSpec.Name);
 
-                var column = new Column(table, columnSpec.Name, type);
-                table.Columns.Add(column);
-            }
+                foreach (var columnSpec in tableSpec.Columns)
+                {
+                    var type = columnSpec.Length.HasValue
+                        ? new SmoDataType(SmoTypes.GetSmoType(columnSpec.DataType), columnSpec.Length.Value)
+                        : new SmoDataType(SmoTypes.GetSmoType(columnSpec.DataType));
 
-            table.Create();
+                    var column = new SmoColumn(table, columnSpec.Name, type);
+                    table.Columns.Add(column);
+                }
+
+                table.Create();
+            });
         }
 
-        public override DatabaseDescriptor Describe()
+        public DatabaseDescriptor Describe()
         {
-            return MetadataFactory.Create(database);
+            return MetadataFactory.Create(this);
         }
 
-        public override T QuerySingle<T>(string sql)
+        public void Execute(string sql)
         {
-            var data = QueryTable(sql);
-
-            if (data.Rows.Count > 0)
+            using (var conn = CreateConnection(open: true))
             {
-                return MapRowToObject<T>(data, data.Rows[0]);
+                var command = new SqlCommand(sql, conn);
+                command.ExecuteNonQuery();
             }
-            
-            return default(T);
         }
 
-        public override dynamic QuerySingle(string sql)
+        public void ExecuteBatch(string batchScript)
         {
-            throw new NotImplementedException();
-        }
-
-        private DataTable QueryTable(string sql)
-        {
-            var results = database.ExecuteWithResults(sql);
-            return results.Tables[0];
-        }
-
-        private T MapRowToObject<T>(DataTable table, DataRow row)
-            where T : new()
-        {
-            var props = TypeDescriptor.GetProperties(typeof(T))
-                .Cast<PropertyDescriptor>()
-                .ToDictionary(x => x.Name);
-
-            return MapRowToObject<T>(table, row, props);
-        }
-
-        private T MapRowToObject<T>(DataTable table, DataRow row, Dictionary<string, PropertyDescriptor> props)
-            where T : new()
-        {
-            var obj = new T();
-
-            foreach (DataColumn col in table.Columns)
+            WithSmo(database =>
             {
-                if (!props.ContainsKey(col.ColumnName))
-                    continue;
-
-                props[col.ColumnName].SetValue(obj, row[col.ColumnName]);
-            }
-
-            return obj;
+                database.ExecuteNonQuery(batchScript);
+            });
         }
 
-        public override void Execute(string sql)
-        {
-            database.ExecuteNonQuery(sql);
-        }
-
-        public override void ExecuteBatch(string batchScript)
-        {
-            database.ExecuteNonQuery(batchScript);
-        }
-
-        public override void ExecuteBatch(IEnumerable<string> batch)
+        public void ExecuteBatch(IEnumerable<string> batch)
         {
             foreach (var sql in batch)
             {
                 ExecuteBatch(sql);
+            }
+        }
+
+        public IEnumerable<Dictionary<string, Object>> Query(string sql)
+        {
+            return QueryInternal(sql, new DictionaryDataMapper());
+        }
+
+        public IEnumerable<T> Query<T>(string sql)
+            where T : new()
+        {
+            return QueryInternal(sql, new AutoDataMapper<T>());
+        }
+
+        public IEnumerable<T> Query<T>(string sql, IDataMapper<T> mapper)
+        {
+            return QueryInternal(sql, mapper);
+        }
+
+        public T QuerySingle<T>(string sql)
+            where T : new()
+        {
+            return QueryInternal(sql, new AutoDataMapper<T>(), 1)
+                .FirstOrDefault();
+        }
+
+        public Dictionary<string, Object> QuerySingle(string sql)
+        {
+            return QueryInternal(sql, new DictionaryDataMapper(), 1)
+                .FirstOrDefault();
+        }
+
+        public T QuerySingle<T>(string sql, string column)
+            where T : IConvertible
+        {
+            var result = QueryInternal(sql, new DictionaryDataMapper(), 1)
+                .FirstOrDefault();
+
+            if (result == null)
+            {
+                return default(T);
+            }
+
+            if (!result.ContainsKey(column))
+            {
+                throw new DatabaseException("Column not present in result set: " + column);
+            }
+
+            return (T)Convert.ChangeType(result[column], typeof(T));
+        }
+
+        public T QuerySingle<T>(string sql, IDataMapper<T> mapper)
+        {
+            return QueryInternal(sql, mapper, 1)
+                .FirstOrDefault();
+        }
+
+        private SqlConnection CreateConnection(bool open = true)
+        {
+            var conn = new SqlConnection(connString);
+
+            if (open)
+            {
+                conn.Open();
+            }
+
+            return conn;
+        }
+
+        private List<T> QueryInternal<T>(string sql, IDataMapper<T> mapper, int limit = 0)
+        {
+            using (var conn = CreateConnection())
+            {
+                var command = new SqlCommand(sql, conn);
+                var reader = command.ExecuteReader();
+                var results = new List<T>();
+
+                while (reader.Read())
+                {
+                    results.Add(mapper.Map(reader));
+
+                    if (limit > 0 && limit >= results.Count)
+                    {
+                        break;
+                    }
+                }
+
+                return results;
+            }
+        }
+
+        private void WithSmo(Action<SmoDatabase> action)
+        {
+            using (var conn = CreateConnection(open: false))
+            {
+                var server = new SmoServer(new SmoConnection(conn));
+                var database = server.Databases[databaseName];
+
+                action(database);
             }
         }
     }

@@ -9,16 +9,26 @@ namespace Skele.Migration
 {
     class ExportCommandHandler : CommandHandlerBase<ExportCommand>
     {
-        public ExportCommandHandler()
+        public ExportCommandHandler(ICommandContext context)
+            : base(context)
         {
-
         }
 
-        public override void Execute(ExportCommand input)
+        public override int Execute(ExportCommand input)
         {
-            var pkg = input.Package;
             var sv = input.TargetVersion;
             var tv = input.TargetVersion;
+
+            var pkg = Context.Packages.Create(Project.Location ?? Environment.CurrentDirectory);
+
+            if (sv == null)
+            {
+                sv = new Version(0, 0, 0, 0);
+            }
+            if (tv == null)
+            {
+                tv = pkg.GetMigrations().Max(x => x.Target);
+            }
 
             Log.WriteLine("Exporting {0} to {1}...", sv, tv);
 
@@ -27,7 +37,7 @@ namespace Skele.Migration
             if (plan.Migrations.Count == 0)
             {
                 Log.WriteLine("Terminating export due to 0 applicable migrations.");
-                return;
+                return FailureResult();
             }
 
             Log.WriteLine("Found {0} migrations.", plan.Migrations.Count);
@@ -51,6 +61,8 @@ namespace Skele.Migration
                     migration.Target.Minor,
                     migration.Target.Revision);
             }
+
+            return SuccessResult();
         }
     }
 }

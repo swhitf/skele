@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Skele.Migration
 {
-    class RefreshCommand : ICommand
+    class RefreshCommand : MigrateCommand
     {
     }
 }

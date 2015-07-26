@@ -8,12 +8,19 @@ namespace Skele.Migration
 {
     public abstract partial class StructuredPackage : Package
     {
+        private IReadOnlyList<MigrationStep> cache;
+
         protected abstract Node GetRoot();
 
         protected abstract Resource CreateResource(Node node);
 
         public override IReadOnlyList<MigrationStep> GetMigrations()
         {
+            if (cache != null)
+            {
+                return cache;
+            }
+
             var migsRoot = TryGetSection("Migrations");
             var results = new List<MigrationStep>();
 
@@ -29,7 +36,7 @@ namespace Skele.Migration
                 results.Add(migration);
             }
 
-            return results;
+            return cache = results;
         }
 
         private Node TryGetSection(string name, bool defaultToRoot = true)

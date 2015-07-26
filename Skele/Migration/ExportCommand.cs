@@ -9,12 +9,6 @@ namespace Skele.Migration
 {
     class ExportCommand : ICommand
     {
-        public Package Package
-        {
-            get;
-            set;
-        }
-
         public Version SourceVersion
         {
             get;

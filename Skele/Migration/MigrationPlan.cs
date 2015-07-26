@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Skele.Util;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -45,6 +46,10 @@ namespace Skele.Migration
 
         public static MigrationPlan Build(Package pkg, Version sv, Version tv)
         {
+            Check.ForNull(pkg, "pkg");
+            Check.ForNull(sv, "sv");
+            Check.ForNull(tv, "tv");
+
             var migs = pkg.GetMigrations()
                 .Where(x => x.Target > sv && x.Target <= tv)
                 .OrderBy(x => x.Target)

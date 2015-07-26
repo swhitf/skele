@@ -1,0 +1,12 @@
+{
+	"version": 1.0,
+	"project": {
+		"name": "Skeke Test",
+		"migrationsPath": "Migrations",
+		"snapshotsPath": "Snapshots",
+		"targets": {
+			"default": "Server=STEPHEN-LAPTOP;Database=SkeleTest;Integrated Security=true;",
+			"home": "Server=STEPHEN-PC\\SQLEXPRESS;Database=SkeleTest;Integrated Security=true;"
+		}
+	}
+}

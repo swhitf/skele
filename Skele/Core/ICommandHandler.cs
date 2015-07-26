@@ -9,6 +9,6 @@ namespace Skele.Core
     public interface ICommandHandler<TCommand> 
         where TCommand : ICommand
     {
-        void Execute(TCommand command);
+        int Execute(TCommand command);
     }
 }

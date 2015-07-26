@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Autofac">
+      <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
+    </Reference>
     <Reference Include="Jint">
       <HintPath>..\packages\Jint.2.5.0\lib\portable-net40+sl50+win+wpa81+wp80\Jint.dll</HintPath>
     </Reference>
@@ -63,6 +66,10 @@
       <Private>True</Private>
       <HintPath>..\packages\Unofficial.Microsoft.SQLServer.SMO.2014.12.0.2000.8\lib\Microsoft.SqlServer.SqlEnum.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -73,51 +80,75 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\CommandHandlerBase.cs" />
+    <Compile Include="Core\ConsolePresenter.cs" />
+    <Compile Include="Core\DefaultCommandContext.cs" />
     <Compile Include="Core\DefaultCommandDispatcher.cs" />
     <Compile Include="Core\ICommand.cs" />
+    <Compile Include="Core\ICommandContext.cs" />
     <Compile Include="Core\ICommandDispatcher.cs" />
     <Compile Include="Core\ICommandHandler.cs" />
-    <Compile Include="Core\InputMapper.cs" />
-    <Compile Include="Interop\ColumnDescriptor.cs" />
-    <Compile Include="Interop\DatabaseDescriptor.cs" />
-    <Compile Include="Interop\DatabaseDriver.cs" />
+    <Compile Include="Core\InputAdapter.cs" />
+    <Compile Include="Core\InputTransform.cs" />
+    <Compile Include="Core\IPresenter.cs" />
+    <Compile Include="Core\ProjectSerializer.cs" />
+    <Compile Include="Core\Project.cs" />
+    <Compile Include="Core\ProjectTargetCollection.cs" />
+    <Compile Include="Core\ProjectTarget.cs" />
     <Compile Include="Interop\DatabaseException.cs" />
-    <Compile Include="Interop\DatabaseSession.cs" />
-    <Compile Include="Interop\ObjectDescriptor.cs" />
-    <Compile Include="Interop\ObjectDescriptorCollection.cs" />
-    <Compile Include="Interop\SqlDialect.cs" />
-    <Compile Include="Interop\SqlGenerator.cs" />
-    <Compile Include="Interop\SqlInsertBuilder.cs" />
+    <Compile Include="Interop\Sql\ISqlDialect.cs" />
+    <Compile Include="Interop\Mapping\DataMapperBase.cs" />
+    <Compile Include="Interop\Mapping\DataMapperFactory.cs" />
+    <Compile Include="Interop\Mapping\DictionaryDataMapper.cs" />
+    <Compile Include="Interop\IDatabaseManager.cs" />
+    <Compile Include="Interop\IDatabaseManagerFactory.cs" />
+    <Compile Include="Interop\IDatabaseSession.cs" />
+    <Compile Include="Interop\Mapping\IDataMapper.cs" />
+    <Compile Include="Interop\MetaModel\ColumnDescriptor.cs" />
+    <Compile Include="Interop\MetaModel\DatabaseDescriptor.cs" />
+    <Compile Include="Interop\MetaModel\Descriptor.cs" />
+    <Compile Include="Interop\MetaModel\DescriptorCollection.cs" />
+    <Compile Include="Interop\MetaModel\TableDescriptor.cs" />
+    <Compile Include="Interop\Sql\SqlBuilder.cs" />
+    <Compile Include="Interop\SqlServer\SqlServerDialect.cs" />
+    <Compile Include="Interop\Sql\SqlGenerator.cs" />
+    <Compile Include="Interop\Sql\SqlInsertBuilder.cs" />
+    <Compile Include="Interop\Sql\SqlQueryBuilder.cs" />
     <Compile Include="Interop\SqlServer\MetadataFactory.cs" />
-    <Compile Include="Interop\SqlBuilder.cs" />
-    <Compile Include="Interop\SqlServer\SqlServerDriver.cs" />
+    <Compile Include="Interop\SqlServer\SqlServerManager.cs" />
+    <Compile Include="Interop\SqlServer\SqlServerManagerFactory.cs" />
     <Compile Include="Interop\SqlServer\SqlServerSession.cs" />
-    <Compile Include="Interop\SqlServer\SqlServerSqlDialect.cs" />
-    <Compile Include="Interop\SqlServer\SqlServerSqlBuilder.cs" />
-    <Compile Include="Interop\SqlServer\TypeMappings.cs" />
-    <Compile Include="Interop\TableDescriptor.cs" />
-    <Compile Include="Migration\DefaultMigrationStrategy.cs" />
+    <Compile Include="Interop\SqlServer\SmoTypes.cs" />
+    <Compile Include="Interop\Mapping\AutoDataMapper.cs" />
+    <Compile Include="IO\DumpCommand.cs" />
+    <Compile Include="IO\DumpCommandHandler.cs" />
+    <Compile Include="IO\IDataFormatter.cs" />
+    <Compile Include="Migration\RefreshCommandHandler.cs" />
+    <Compile Include="Migration\RefreshCommand.cs" />
     <Compile Include="Migration\DirectoryPackage.cs" />
     <Compile Include="Migration\ExportCommand.cs" />
     <Compile Include="Migration\ExportCommandHandler.cs" />
-    <Compile Include="Migration\IMigrationStrategy.cs" />
-    <Compile Include="Migration\InitCommandHandler.cs" />
     <Compile Include="Migration\InitCommand.cs" />
-    <Compile Include="Migration\MigrateCommandHandler.cs" />
+    <Compile Include="Migration\InitCommandHandler.cs" />
     <Compile Include="Migration\MigrateCommand.cs" />
-    <Compile Include="Migration\MigrationStep.cs" />
+    <Compile Include="Migration\MigrateCommandHandler.cs" />
     <Compile Include="Migration\MigrationPlan.cs" />
+    <Compile Include="Migration\MigrationStep.cs" />
     <Compile Include="Migration\Package.cs" />
     <Compile Include="Migration\PackageFactory.cs" />
-    <Compile Include="Migration\RefreshCommand.cs" />
-    <Compile Include="Migration\RefreshCommandHandler.cs" />
+    <Compile Include="Migration\PrepareCommandHandler.cs" />
+    <Compile Include="Migration\PrepareCommand.cs" />
     <Compile Include="Migration\Resource.cs" />
     <Compile Include="Migration\StructuredPackage.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scripting\ExecuteCommandHandler.cs" />
+    <Compile Include="Scripting\IEnvironment.cs" />
     <Compile Include="Scripting\ExecuteCommand.cs" />
+    <Compile Include="Scripting\ExecuteCommandHandler.cs" />
     <Compile Include="Scripting\TableAdapter.cs" />
+    <Compile Include="Util\Check.cs" />
+    <Compile Include="Util\HelloCommandHandler.cs" />
+    <Compile Include="Util\HelloCommand.cs" />
+    <Compile Include="Util\Win32.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

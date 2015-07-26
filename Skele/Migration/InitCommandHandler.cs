@@ -1,5 +1,6 @@
 ﻿using Skele.Core;
 using Skele.Interop;
+using Skele.Interop.MetaModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,16 +11,14 @@ namespace Skele.Migration
 {
     class InitCommandHandler : CommandHandlerBase<InitCommand>
     {
-        private DatabaseDriver driver;
-
-        public InitCommandHandler(DatabaseDriver driver)
+        public InitCommandHandler(ICommandContext context)
+            : base(context)
         {
-            this.driver = driver;
         }
 
-        public override void Execute(InitCommand input)
+        public override int Execute(InitCommand input)
         {
-            var session = GetOrCreateSession("Katana");
+            var session = GetOrCreateSession();
             var metadata = session.Describe();
 
             if (!metadata.Tables.Contains("__Version"))
@@ -37,18 +36,22 @@ namespace Skele.Migration
             }
 
             Log.WriteLine("Database initialized.");
+            return SuccessResult();
         }
 
-        private DatabaseSession GetOrCreateSession(string name)
+        private IDatabaseSession GetOrCreateSession()
         {
-            if (!driver.Exists(name))
+            var target = GetTarget();
+            var manager = GetDatabaseManager(target);
+
+            if (!manager.Exists(target.Database))
             {
-                Log.WriteLine("Database '{0}' not found, creating...", name);
-                return driver.Create(name);
+                Log.WriteLine("Database '{0}' not found, creating...", target.Database);
+                return manager.Create(target.Database);
             }
             else
             {
-                return driver.Open(name);
+                return manager.Open(target.Database);
             }
         }
     }

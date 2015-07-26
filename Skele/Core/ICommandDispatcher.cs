@@ -8,7 +8,7 @@ namespace Skele.Core
 {
     public interface ICommandDispatcher
     {
-        void Dispatch<T>(T command)
+        int Dispatch<T>(T command)
             where T : ICommand;
     }
 }

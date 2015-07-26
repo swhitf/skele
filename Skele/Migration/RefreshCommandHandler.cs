@@ -9,18 +9,34 @@ namespace Skele.Migration
 {
     class RefreshCommandHandler : CommandHandlerBase<RefreshCommand>
     {
-        private ICommandDispatcher dispatcher;
-
-        public RefreshCommandHandler(ICommandDispatcher dispatcher)
+        public RefreshCommandHandler(ICommandContext context)
+            : base(context)
         {
-            this.dispatcher = dispatcher;
+
         }
 
-        public override void Execute(RefreshCommand input)
+        public override int Execute(RefreshCommand input)
         {
-            dispatcher.Dispatch(new InitCommand());
+            var target = GetTarget();
+            var manager = GetDatabaseManager();
+            
+            if (manager.Exists(target.Database))
+            {
+                Log.WriteLine("Dropping {0}...", target.Database);
+                manager.Delete(target.Database);
+            }
 
+            if (Dispatcher.Dispatch(new InitCommand()) != 0)
+            {
+                return FailureResult();
+            }
 
+            if (Dispatcher.Dispatch<MigrateCommand>(input) != 0)
+            {
+                return FailureResult();
+            }
+
+            return SuccessResult();
         }
     }
 }

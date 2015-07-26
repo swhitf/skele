@@ -9,6 +9,11 @@ namespace Skele.Scripting
 {
     class ExecuteCommand : ICommand
     {
+        public ExecuteCommand()
+        {
+            FilePath = "test.js";
+        }
+
         public string FilePath
         {
             get;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Skele.Core;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,9 +20,9 @@ namespace Skele.Migration
             throw new InvalidOperationException();
         }
 
-        //public virtual Package Create(Uri uri)
-        //{
-            
-        //}
+        public virtual Package Create(Project project)
+        {
+            return Create(project.Location);
+        }
     }
 }

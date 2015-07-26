@@ -1,4 +1,6 @@
-﻿using Skele.Interop;
+﻿using Jint;
+using Skele.Interop;
+using Skele.Interop.MetaModel;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -11,15 +13,30 @@ namespace Skele.Scripting
     class TableAdapter
     {
         private TableDescriptor table;
+        private IDatabaseSession session;
+        private Engine engine;
 
-        public TableAdapter(TableDescriptor table)
+        public TableAdapter(Engine engine, IDatabaseSession session, TableDescriptor table)
         {
+            this.engine = engine;
+            this.session = session;
             this.table = table;
         }
 
         public void add(IDictionary<string, Object> data)
         {
-            throw new NotImplementedException();
+            var builder = session.Build();
+            var sql = builder.Insert(table.Name, data);
+
+            session.Execute(sql);
+        }
+
+        public void truncate()
+        {
+            var builder = session.Build();
+            var sql = builder.Truncate(table.Name);
+
+            session.Execute(sql);
         }
     }
 }

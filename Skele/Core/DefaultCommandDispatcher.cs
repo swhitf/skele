@@ -8,36 +8,39 @@ namespace Skele.Core
 {
     class DefaultCommandDispatcher : ICommandDispatcher
     {
-        private Dictionary<Type, Object> handlers;
+        private Dictionary<Type, Func<Object>> factories;
 
         public DefaultCommandDispatcher()
         {
-            handlers = new Dictionary<Type, Object>();
+            factories = new Dictionary<Type, Func<Object>>();
         }
 
-        public void Register<T>(ICommandHandler<T> handler)
+        public void Register<T>(Func<ICommandHandler<T>> factory)
             where T : ICommand
         {
-            handlers.Add(typeof(T), handler);
+            factories.Add(typeof(T), factory);
         }
 
-        public void Dispatch<T>(T command) where T : ICommand
+        public int Dispatch<T>(T command) where T : ICommand
         {
-            var type = command.GetType();
+            var type = typeof(T);
 
-            if (handlers.ContainsKey(type))
+            if (factories.ContainsKey(type))
             {
-                var handler = (ICommandHandler<T>)handlers[type];
+                var factory = factories[type];
+                var handler = (ICommandHandler<T>)factory();
 
                 if (handler == null)
                 {
                     throw new ApplicationException(string.Format("Invalid handler registered for command: {0}", type.Name));
                 }
 
-                handler.Execute(command);
+                return handler.Execute(command);
             }
-
-            throw new InvalidOperationException(string.Format("Unrecognized command: {0}", type.Name));
+            else
+            {
+                throw new InvalidOperationException(string.Format("Unrecognized command: {0}", type.Name));
+            }
         }
     }
 }

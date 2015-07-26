@@ -10,25 +10,25 @@ namespace Skele.Migration
 {
     class MigrateCommandHandler : CommandHandlerBase<MigrateCommand>
     {
-        private DatabaseDriver driver;
-
-        public MigrateCommandHandler(
-            DatabaseDriver driver)
+        public MigrateCommandHandler(ICommandContext context)
+            : base(context)
         {
-            this.driver = driver;
         }
 
-        public override void Execute(MigrateCommand input)
+        public override int Execute(MigrateCommand input)
         {
-            var pkg = input.Package;
             var sv = input.TargetVersion;
             var tv = input.TargetVersion;
-
-            var session = driver.Open("Katana");
+            var pkg = new PackageFactory().Create(Project);
+            var session = GetDatabaseSession();
 
             if (sv == null)
             {
                 sv = DetectVersion(session) ?? new Version(0, 0);
+            }
+            if (tv == null)
+            {
+                tv = pkg.GetMigrations().Max(x => x.Target);
             }
 
             var plan = MigrationPlan.Build(pkg, sv, tv);
@@ -37,21 +37,43 @@ namespace Skele.Migration
             {
                 Log.WriteLine("Migrating to " + migration.Target);
 
-                foreach (var r in migration)
+                foreach (var resource in migration)
                 {
-                    Log.WriteLine("  " + r.Name);
-                    session.ExecuteBatch(r.ReadFull());
+                    Log.WriteLine("  " + resource.Name);
+                    session.ExecuteBatch(resource.ReadFull());
                 }
 
-                Console.WriteLine("version: " + migration.Target);
+                SignVersion(session, migration.Target);
+                Log.WriteLine("Version: " + migration.Target);
             }
+
+            return SuccessResult();
         }
 
-        private Version DetectVersion(DatabaseSession session)
+        private void SignVersion(IDatabaseSession session, Version version)
         {
-            var sql =
-                "SELECT TOP 1 Major, Minor, Patch AS Revision, 0 AS Build " +
-                "FROM __VERSION ORDER BY Major, Minor, Patch DESC";
+            var sql = session.Build()
+                .Insert("__Version")
+                .Data(new
+                {
+                    Major = version.Major,
+                    Minor = version.Minor,
+                    Revision = version.Revision,
+                    InstallDate = DateTime.UtcNow,
+                })
+                .ToSql();
+            Console.WriteLine(sql);
+            session.Execute(sql);
+        }
+        
+        private Version DetectVersion(IDatabaseSession session)
+        {
+            var sql = session.Build()
+                .Query("__Version")
+                .Select("Major", "Minor", "Patch|Revision")
+                .OrderBy("Major|DESC", "Minor|DESC", "Patch|DESC")
+                .Limit(1)
+                .ToSql();
 
             var version = session.QuerySingle<Version>(sql);
 
