@@ -34,16 +34,6 @@ namespace Skele.Interop.SqlServer
             return new SqlServerSession(server.Databases[databaseName]);
         }
 
-        public override DatabaseDescriptor Describe(string databaseName)
-        {
-            if (!Exists(databaseName))
-            {
-                throw new DatabaseException(databaseName + " does not exist.");
-            }
-
-            return MetadataFactory.Create(server.Databases[databaseName]);
-        }
-
         public override IEnumerable<string> List()
         {
             foreach (Database db in server.Databases)
