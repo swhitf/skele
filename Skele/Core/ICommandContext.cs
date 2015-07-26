@@ -9,18 +9,8 @@ using System.Threading.Tasks;
 
 namespace Skele.Core
 {
-    interface ICommandContext
+    public interface ICommandContext
     {
-        IDatabaseManagerFactory DatabaseManagerFactory
-        {
-            get;
-        }
-
-        ICommandDispatcher Dispatcher
-        {
-            get;
-        }
-
         TextWriter Log
         {
             get;
@@ -31,24 +21,18 @@ namespace Skele.Core
             get;
         }
 
-        PackageFactory Packages
-        {
-            get;
-        }
-
-        IPresenter Presenter
-        {
-            get;
-        }
-
         Project Project
         {
             get;
         }
 
-        string TargetName
+        ProjectTarget ActiveTarget
         {
             get;
         }
+
+        IDatabaseSession GetDatabaseSession(ProjectTarget target = null);
+
+        IDatabaseManager GetDatabaseManager(ProjectTarget target = null);
     }
 }

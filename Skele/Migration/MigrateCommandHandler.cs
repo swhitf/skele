@@ -19,8 +19,8 @@ namespace Skele.Migration
         {
             var sv = input.TargetVersion;
             var tv = input.TargetVersion;
-            var pkg = new PackageFactory().Create(Project);
-            var session = GetDatabaseSession();
+            var pkg = new PackageFactory().Create(Context.Project);
+            var session = Context.GetDatabaseSession();
 
             if (sv == null)
             {

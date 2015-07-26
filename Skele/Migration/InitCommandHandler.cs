@@ -41,8 +41,8 @@ namespace Skele.Migration
 
         private IDatabaseSession GetOrCreateSession()
         {
-            var target = GetTarget();
-            var manager = GetDatabaseManager(target);
+            var target = Context.ActiveTarget;
+            var manager = Context.GetDatabaseManager(target);
 
             if (!manager.Exists(target.Database))
             {

@@ -9,17 +9,20 @@ namespace Skele.Migration
 {
     class ExportCommandHandler : CommandHandlerBase<ExportCommand>
     {
-        public ExportCommandHandler(ICommandContext context)
+        private PackageFactory packages;
+        public ExportCommandHandler(ICommandContext context, PackageFactory packages)
             : base(context)
         {
+            this.packages = packages;
         }
 
         public override int Execute(ExportCommand input)
         {
             var sv = input.TargetVersion;
             var tv = input.TargetVersion;
+            var proj = Context.Project;
 
-            var pkg = Context.Packages.Create(Project.Location ?? Environment.CurrentDirectory);
+            var pkg = packages.Create(proj.Location ?? Environment.CurrentDirectory);
 
             if (sv == null)
             {

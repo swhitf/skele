@@ -8,27 +8,20 @@ namespace Skele.Core
 {
     class DefaultCommandDispatcher : ICommandDispatcher
     {
-        private Dictionary<Type, Func<Object>> factories;
+        private ICommandRegistry register;
 
-        public DefaultCommandDispatcher()
+        public DefaultCommandDispatcher(ICommandRegistry register)
         {
-            factories = new Dictionary<Type, Func<Object>>();
-        }
-
-        public void Register<T>(Func<ICommandHandler<T>> factory)
-            where T : ICommand
-        {
-            factories.Add(typeof(T), factory);
+            this.register = register;
         }
 
         public int Dispatch<T>(T command) where T : ICommand
         {
             var type = typeof(T);
 
-            if (factories.ContainsKey(type))
+            if (register.Contains<T>())
             {
-                var factory = factories[type];
-                var handler = (ICommandHandler<T>)factory();
+                var handler = register.ResolveHandler<T>();
 
                 if (handler == null)
                 {

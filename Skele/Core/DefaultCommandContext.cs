@@ -11,7 +11,17 @@ namespace Skele.Core
 {
     class DefaultCommandContext : ICommandContext
     {
-        public IDatabaseManagerFactory DatabaseManagerFactory
+        private INamedTypeFactory<IDatabaseManagerFactory> driverFactory;
+
+        public DefaultCommandContext(INamedTypeFactory<IDatabaseManagerFactory> driverFactory)
+        {
+            this.driverFactory = driverFactory;
+
+            Log = TextWriter.Null;
+            Output = TextWriter.Null;
+        }
+
+        public Project Project
         {
             get;
             set;
@@ -29,35 +39,54 @@ namespace Skele.Core
             set;
         }
 
-        public PackageFactory Packages
+        public ProjectTarget ActiveTarget
         {
             get;
-            set;
+            private set;
         }
 
-        public IPresenter Presenter
+        public void SetTarget(string targetName)
         {
-            get;
-            set;
+            if (string.IsNullOrEmpty(targetName))
+            {
+                ActiveTarget = Project.DefaultTarget;
+            }
+            else
+            {
+                if (Project.Targets.Contains(targetName))
+                {
+                    ActiveTarget = Project.Targets[targetName];
+                }
+                else
+                {
+                    throw new InvalidOperationException("Specified project target does not exist: " + targetName);
+                }
+            }
+        }
+        
+        public IDatabaseSession GetDatabaseSession(ProjectTarget target = null)
+        {
+            if (target == null)
+            {
+                target = ActiveTarget;
+            }
+
+            var driver = driverFactory.Create("SqlServer");
+            var manager = driver.Create(target.ConnectionString);
+            var session = manager.Open(target.Database);
+
+            return session;
         }
 
-        public Project Project
+        public IDatabaseManager GetDatabaseManager(ProjectTarget target = null)
         {
-            get;
-            set;
-        }
+            if (target == null)
+            {
+                target = ActiveTarget;
+            }
 
-        public string TargetName
-        {
-            get;
-            set;
-        }
-
-
-        public ICommandDispatcher Dispatcher
-        {
-            get;
-            set;
+            var driver = driverFactory.Create("SqlServer");
+            return driver.Create(target.ConnectionString);
         }
     }
 }

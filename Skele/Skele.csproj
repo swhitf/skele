@@ -32,8 +32,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Autofac">
+    <Reference Include="Autofac, Version=3.5.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
+    </Reference>
+    <Reference Include="Autofac.Integration.Mef">
+      <HintPath>..\packages\Autofac.Mef.3.0.3\lib\net40\Autofac.Integration.Mef.dll</HintPath>
     </Reference>
     <Reference Include="Jint">
       <HintPath>..\packages\Jint.2.5.0\lib\portable-net40+sl50+win+wpa81+wp80\Jint.dll</HintPath>
@@ -71,6 +75,7 @@
       <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -79,6 +84,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\AutofacCommandRegistry.cs" />
+    <Compile Include="Core\AutofacNamedTypeFactory.cs" />
     <Compile Include="Core\CommandHandlerBase.cs" />
     <Compile Include="Core\ConsolePresenter.cs" />
     <Compile Include="Core\DefaultCommandContext.cs" />
@@ -87,9 +94,11 @@
     <Compile Include="Core\ICommandContext.cs" />
     <Compile Include="Core\ICommandDispatcher.cs" />
     <Compile Include="Core\ICommandHandler.cs" />
+    <Compile Include="Core\ICommandRegistry.cs" />
     <Compile Include="Core\InputAdapter.cs" />
     <Compile Include="Core\InputTransform.cs" />
     <Compile Include="Core\IPresenter.cs" />
+    <Compile Include="Core\INamedTypeFactory.cs" />
     <Compile Include="Core\ProjectSerializer.cs" />
     <Compile Include="Core\Project.cs" />
     <Compile Include="Core\ProjectTargetCollection.cs" />
@@ -119,9 +128,6 @@
     <Compile Include="Interop\SqlServer\SqlServerSession.cs" />
     <Compile Include="Interop\SqlServer\SmoTypes.cs" />
     <Compile Include="Interop\Mapping\AutoDataMapper.cs" />
-    <Compile Include="IO\DumpCommand.cs" />
-    <Compile Include="IO\DumpCommandHandler.cs" />
-    <Compile Include="IO\IDataFormatter.cs" />
     <Compile Include="Migration\RefreshCommandHandler.cs" />
     <Compile Include="Migration\RefreshCommand.cs" />
     <Compile Include="Migration\DirectoryPackage.cs" />

@@ -15,13 +15,6 @@ namespace Skele.Core
         public CommandHandlerBase(ICommandContext context)
         {
             Context = context;
-
-            DatabaseManagerFactory = context.DatabaseManagerFactory;
-            Dispatcher = context.Dispatcher;
-            Log = context.Log;
-            Output = context.Output;
-            Presenter = context.Presenter;
-            Project = context.Project;
         }
 
         protected ICommandContext Context
@@ -30,84 +23,14 @@ namespace Skele.Core
             private set;
         }
 
-        protected ICommandDispatcher Dispatcher
-        {
-            get;
-            private set;
-        }
-
-        protected IDatabaseManagerFactory DatabaseManagerFactory
-        {
-            get;
-            private set;
-        }
-
         protected TextWriter Log
         {
-            get;
-            private set;
+            get { return Context.Log; }
         }
 
         protected TextWriter Output
         {
-            get;
-            private set;
-        }
-
-        protected IPresenter Presenter
-        {
-            get;
-            private set;
-        }
-
-        protected Project Project
-        {
-            get;
-            private set;
-        }
-
-        protected ProjectTarget GetTarget()
-        {
-            var tn = Context.TargetName;
-
-            if (string.IsNullOrEmpty(tn))
-            {
-                return Project.DefaultTarget;
-            }
-            else
-            {
-                if (Project.Targets.Contains(tn))
-                {
-                    return Project.Targets[tn];
-                }
-                else
-                {
-                    throw new InvalidOperationException("Specified project target does not exist: " + tn);
-                }
-            }
-        }
-
-        protected IDatabaseSession GetDatabaseSession(ProjectTarget target = null)
-        {
-            if (target == null)
-            {
-                target = GetTarget();
-            }
-
-            var manager = DatabaseManagerFactory.Create(target.ConnectionString);
-            var session = manager.Open(target.Database);
-
-            return session;
-        }
-
-        protected IDatabaseManager GetDatabaseManager(ProjectTarget target = null)
-        {
-            if (target == null)
-            {
-                target = GetTarget();
-            }
-
-            return DatabaseManagerFactory.Create(target.ConnectionString);
+            get { return Context.Output; }
         }
 
         public abstract int Execute(T input);

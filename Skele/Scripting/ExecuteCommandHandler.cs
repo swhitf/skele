@@ -20,7 +20,7 @@ namespace Skele.Scripting
 
         public override int Execute(ExecuteCommand input)
         {
-            var session = GetDatabaseSession();
+            var session = Context.GetDatabaseSession();
             var metadata = session.Describe();
             var engine = new Engine();
 

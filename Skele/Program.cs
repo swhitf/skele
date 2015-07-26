@@ -1,4 +1,6 @@
-﻿using Skele.Core;
+﻿using Autofac;
+using Autofac.Integration.Mef;
+using Skele.Core;
 using Skele.Interop;
 using Skele.Interop.SqlServer;
 using Skele.Migration;
@@ -10,6 +12,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel.Composition;
+using System.Reflection;
+using System.ComponentModel.Composition.Hosting;
+using Autofac.Core;
 
 namespace Skele
 {
@@ -17,13 +23,29 @@ namespace Skele
     {
         public static int Main(string[] args)
         {
+            return new Program().Run(args);
+        }
+
+        private string projectLocationParam;
+        private string projectTargetParam;
+        private TextWriter outputWriter;
+        private TextWriter logWriter;
+
+        public Program()
+        {
+            projectLocationParam = Environment.CurrentDirectory;
+            projectTargetParam = "default";
+        }
+
+        private int Run(string[] args)
+        {
             if (args.Length == 0)
             {
                 Console.WriteLine("Interactive mode:");
                 string input = Console.ReadLine();
                 while (input != "exit")
                 {
-                    Main(Win32.CommandLineToArgs(input));
+                    Run(Win32.CommandLineToArgs(input));
                     input = Console.ReadLine();
                 }
 
@@ -31,38 +53,17 @@ namespace Skele
             }
             else
             {
-                var dispatcher = new DefaultCommandDispatcher();
-
                 var noPrompt = false;
-                var context = new DefaultCommandContext
-                {
-                    DatabaseManagerFactory = new SqlServerManagerFactory(),
-                    Dispatcher = dispatcher,
-                    Log = Console.Out,
-                    Output = Console.Out,
-                    Packages = new PackageFactory(),
-                    Presenter = new ConsolePresenter(),
-                    Project = Project.TryLoad(Environment.CurrentDirectory),
-                };
-
-                dispatcher.Register(() => new HelloCommandHandler(context));
-                dispatcher.Register(() => new PrepareCommandHandler(context));
-                dispatcher.Register(() => new InitCommandHandler(context));
-                dispatcher.Register(() => new ExecuteCommandHandler(context));
-                dispatcher.Register(() => new ExportCommandHandler(context));
-                dispatcher.Register(() => new MigrateCommandHandler(context));
-                dispatcher.Register(() => new RefreshCommandHandler(context));
-
-                var input = new InputAdapter<DefaultCommandDispatcher>(dispatcher);
+                var container = ComposeContainer();
+                var input = new InputAdapter(container.Resolve<ICommandDispatcher>());
 
                 input.Filter()
-                    .FlipSwitch("dbg", "debug", d => System.Diagnostics.Debugger.Launch())
                     .FlipSwitch("np", "noprompt", d => noPrompt = true)
-                    .FlipSwitch("q", "quiet", d => context.Log = TextWriter.Null)
-                    .ValueSwitch("l", "log", (d, v) => context.Log = new StreamWriter(File.Open(v, FileMode.Create)))
-                    .ValueSwitch("o", "output", (d, v) => context.Output = new StreamWriter(File.Open(v, FileMode.Create)))
-                    .ValueSwitch("p", "project", (d, v) => context.Project = Project.Load(v))
-                    .ValueSwitch("t", "target", (x, v) => context.TargetName = v);
+                    .FlipSwitch("q", "quiet", d => logWriter = TextWriter.Null)
+                    .ValueSwitch("l", "log", (d, v) => logWriter = new StreamWriter(File.Open(v, FileMode.Create)))
+                    .ValueSwitch("o", "output", (d, v) => outputWriter = new StreamWriter(File.Open(v, FileMode.Create)))
+                    .ValueSwitch("p", "project", (d, v) => projectLocationParam = v)
+                    .ValueSwitch("t", "target", (x, v) => projectTargetParam = v);
 
                 input.Map<HelloCommand>("hello");
 
@@ -104,6 +105,63 @@ namespace Skele
             }
         }
 
+        private IContainer ComposeContainer()
+        {
+            var composer = new ContainerBuilder();
+
+            //Register all local command handlers:
+            composer
+                .RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
+                .Where(x => ImplementsGenericInterface(typeof(ICommandHandler<>), x))
+                .AsImplementedInterfaces();
+
+            //Register autofac command registry
+            composer
+                .RegisterType<AutofacCommandRegistry>()
+                .As<ICommandRegistry>();
+
+            //Register command dispatcher
+            composer
+                .RegisterType<DefaultCommandDispatcher>()
+                .As<ICommandDispatcher>();
+
+            //Register integrated SqlServer database driver
+            composer
+                .RegisterType<SqlServerManagerFactory>()
+                .Named<IDatabaseManagerFactory>("SqlServer");
+
+            //Register type factory for database drivers
+            composer
+                .RegisterType<AutofacNamedTypeFactory<IDatabaseManagerFactory>>()
+                .As<INamedTypeFactory<IDatabaseManagerFactory>>();
+
+            //Register UI service
+            composer
+                .RegisterType<ConsolePresenter>()
+                .As<IPresenter>();
+
+            //Register package factory
+            composer
+                .RegisterType<PackageFactory>();
+
+            //Register command context
+            composer
+                .RegisterType<DefaultCommandContext>()
+                .As<ICommandContext>()
+                .OnActivated(DecorateCommandContext);
+
+            return composer.Build();
+        }
+
+        private void DecorateCommandContext(IActivatedEventArgs<DefaultCommandContext> e)
+        {
+            var cc = e.Instance;
+            cc.Project = Project.Load(projectLocationParam);
+            cc.SetTarget(projectTargetParam);
+            cc.Output = outputWriter ?? TextWriter.Null;
+            cc.Log = logWriter ?? TextWriter.Null;
+        }
+
         private static string FormatException(Exception ex)
         {
             var message = new StringBuilder();
@@ -121,6 +179,13 @@ namespace Skele
             message.AppendLine(ex.StackTrace);
 
             return message.ToString();
+        }
+
+        private static bool ImplementsGenericInterface(Type g, Type t)
+        {
+            return t.GetInterfaces().Any(x =>
+                x.IsGenericType &&
+                x.GetGenericTypeDefinition() == g);
         }
     }
 }
