@@ -11,9 +11,9 @@ namespace Skele.Core
 {
     class DefaultCommandContext : ICommandContext
     {
-        private INamedTypeFactory<IDatabaseManagerFactory> driverFactory;
+        private INamedTypeFactory<IDatabaseDriver> driverFactory;
 
-        public DefaultCommandContext(INamedTypeFactory<IDatabaseManagerFactory> driverFactory)
+        public DefaultCommandContext(INamedTypeFactory<IDatabaseDriver> driverFactory)
         {
             this.driverFactory = driverFactory;
 
@@ -71,8 +71,8 @@ namespace Skele.Core
                 target = ActiveTarget;
             }
 
-            var driver = driverFactory.Create("SqlServer");
-            var manager = driver.Create(target.ConnectionString);
+            var driver = driverFactory.Create(target.DriverName);
+            var manager = driver.Connect(target.ConnectionString);
             var session = manager.Open(target.Database);
 
             return session;
@@ -85,8 +85,8 @@ namespace Skele.Core
                 target = ActiveTarget;
             }
 
-            var driver = driverFactory.Create("SqlServer");
-            return driver.Create(target.ConnectionString);
+            var driver = driverFactory.Create(target.DriverName);
+            return driver.Connect(target.ConnectionString);
         }
     }
 }

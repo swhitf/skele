@@ -95,5 +95,9 @@ namespace Skele.Interop.SqlServer
                 session.Execute(sql.ToString());
             }
         }
+
+        public void Dispose()
+        {
+        }
     }
 }

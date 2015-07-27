@@ -56,7 +56,9 @@ namespace Skele.Migration
             }
 
             project.Targets.Add(new ProjectTarget(
-                "default", presenter.Prompt("Enter the default target connection string:")));
+                "default", 
+                presenter.Prompt("Enter the default target driver name:"),
+                presenter.Prompt("Enter the default target connection string:")));
 
             new ProjectSerializer().Serialize(
                 project, Path.Combine(dir.FullName, Project.DEFAULT_FILE));

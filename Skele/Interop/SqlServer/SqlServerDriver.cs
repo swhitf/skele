@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Skele.Interop.SqlServer
 {
-    class SqlServerManagerFactory : IDatabaseManagerFactory
+    class SqlServerDriver : IDatabaseDriver
     {
-        public IDatabaseManager Create(string connectionString)
+        public IDatabaseManager Connect(string connectionString)
         {
             return new SqlServerManager(connectionString);
         }

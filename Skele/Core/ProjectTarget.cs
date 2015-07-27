@@ -9,9 +9,10 @@ namespace Skele.Core
 {
     public class ProjectTarget
     {
-        public ProjectTarget(string name, string connString)
+        public ProjectTarget(string name, string driverName, string connString)
         {
             Name = name;
+            DriverName = driverName;
             ConnectionString = connString;
 
             var csb = new SqlConnectionStringBuilder(connString);
@@ -25,6 +26,12 @@ namespace Skele.Core
         }
 
         public string Database
+        {
+            get;
+            private set;
+        }
+
+        public string DriverName
         {
             get;
             private set;

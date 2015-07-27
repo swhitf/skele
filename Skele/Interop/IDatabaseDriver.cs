@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Skele.Interop
 {
-    public interface IDatabaseManagerFactory
+    public interface IDatabaseDriver
     {
-        IDatabaseManager Create(string connectionString);
+        IDatabaseManager Connect(string connectionString);
     }
 }

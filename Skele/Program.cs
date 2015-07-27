@@ -123,32 +123,43 @@ namespace Skele
             //Register command dispatcher
             composer
                 .RegisterType<DefaultCommandDispatcher>()
-                .As<ICommandDispatcher>();
+                .As<ICommandDispatcher>()
+                .Exported(x => x.As<ICommandDispatcher>());
 
             //Register integrated SqlServer database driver
             composer
-                .RegisterType<SqlServerManagerFactory>()
-                .Named<IDatabaseManagerFactory>("SqlServer");
+                .RegisterType<SqlServerDriver>()
+                .Named<IDatabaseDriver>("SqlServer")
+                .Exported(x => x.As<IDatabaseDriver>());
 
             //Register type factory for database drivers
             composer
-                .RegisterType<AutofacNamedTypeFactory<IDatabaseManagerFactory>>()
-                .As<INamedTypeFactory<IDatabaseManagerFactory>>();
+                .RegisterType<AutofacNamedTypeFactory<IDatabaseDriver>>()
+                .As<INamedTypeFactory<IDatabaseDriver>>()
+                .Exported(x => x.As<INamedTypeFactory<IDatabaseDriver>>());
 
             //Register UI service
             composer
                 .RegisterType<ConsolePresenter>()
-                .As<IPresenter>();
+                .As<IPresenter>()
+                .Exported(x => x.As<IPresenter>());
 
             //Register package factory
             composer
-                .RegisterType<PackageFactory>();
+                .RegisterType<PackageFactory>()
+                .Exported(x => x.As<PackageFactory>());
 
             //Register command context
             composer
                 .RegisterType<DefaultCommandContext>()
                 .As<ICommandContext>()
+                .Exported(x => x.As<ICommandContext>())
                 .OnActivated(DecorateCommandContext);
+
+            //Register extensions
+            composer
+                .RegisterComposablePartCatalog(new DirectoryCatalog(
+                    Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "ext")));
 
             return composer.Build();
         }

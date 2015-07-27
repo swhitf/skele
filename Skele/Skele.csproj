@@ -109,7 +109,7 @@
     <Compile Include="Interop\Mapping\DataMapperFactory.cs" />
     <Compile Include="Interop\Mapping\DictionaryDataMapper.cs" />
     <Compile Include="Interop\IDatabaseManager.cs" />
-    <Compile Include="Interop\IDatabaseManagerFactory.cs" />
+    <Compile Include="Interop\IDatabaseDriver.cs" />
     <Compile Include="Interop\IDatabaseSession.cs" />
     <Compile Include="Interop\Mapping\IDataMapper.cs" />
     <Compile Include="Interop\MetaModel\ColumnDescriptor.cs" />
@@ -124,7 +124,7 @@
     <Compile Include="Interop\Sql\SqlQueryBuilder.cs" />
     <Compile Include="Interop\SqlServer\MetadataFactory.cs" />
     <Compile Include="Interop\SqlServer\SqlServerManager.cs" />
-    <Compile Include="Interop\SqlServer\SqlServerManagerFactory.cs" />
+    <Compile Include="Interop\SqlServer\SqlServerDriver.cs" />
     <Compile Include="Interop\SqlServer\SqlServerSession.cs" />
     <Compile Include="Interop\SqlServer\SmoTypes.cs" />
     <Compile Include="Interop\Mapping\AutoDataMapper.cs" />

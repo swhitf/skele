@@ -80,13 +80,18 @@ namespace Skele.Core
                 MigrationsPath = project.MigrationsPath;
                 SnapshotsPath = project.SnapshotsPath;
                 Targets = project.Targets.ToDictionary(
-                    x => x.Name, x => x.ConnectionString);
+                    x => x.Name,
+                    x => new Dictionary<string, string>
+                    {
+                        { "Driver", x.DriverName },
+                        { "Connection", x.ConnectionString },
+                    });
             }
 
             public string Name;
             public string MigrationsPath;
             public string SnapshotsPath;
-            public Dictionary<string, string> Targets;
+            public Dictionary<string, Dictionary<string, string>> Targets;
 
             public Project ToProject()
             {
@@ -99,7 +104,12 @@ namespace Skele.Core
 
                 foreach (var entry in Targets)
                 {
-                    proj.Targets.Add(new ProjectTarget(entry.Key, entry.Value));
+                    var values = entry.Value;
+
+                    proj.Targets.Add(new ProjectTarget(
+                        entry.Key, 
+                        values["Driver"],
+                        values["Connection"]));
                 }
 
                 return proj;
