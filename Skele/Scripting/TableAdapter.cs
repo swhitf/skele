@@ -16,14 +16,13 @@ namespace Skele.Scripting
         private IDatabaseSession session;
         private Engine engine;
 
-        public TableAdapter(Engine engine, IDatabaseSession session, TableDescriptor table)
+        public TableAdapter(IDatabaseSession session, TableDescriptor table)
         {
-            this.engine = engine;
             this.session = session;
             this.table = table;
         }
 
-        public void add(IDictionary<string, Object> data)
+        public void Add(IScriptContext context, IDictionary<string, Object> data)
         {
             var builder = session.Build();
             var sql = builder.Insert(table.Name, data);
@@ -31,7 +30,7 @@ namespace Skele.Scripting
             session.Execute(sql);
         }
 
-        public void truncate()
+        public void Truncate(IScriptContext context)
         {
             var builder = session.Build();
             var sql = builder.Truncate(table.Name);

@@ -9,16 +9,16 @@ namespace Skele.Core
 {
     class AutofacNamedTypeFactory<T> : INamedTypeFactory<T>
     {
-        private IContainer container;
+        private IComponentContext context;
 
-        public AutofacNamedTypeFactory(IContainer container)
+        public AutofacNamedTypeFactory(IComponentContext context)
         {
-            this.container = container;
+            this.context = context;
         }
 
         public T Create(string name)
         {
-            return container.ResolveNamed<T>(name);
+            return context.ResolveNamed<T>(name);
         }
     }
 }

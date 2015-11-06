@@ -99,6 +99,8 @@ namespace Skele.Interop.SqlServer
                 case "TIME":
                 case "TIMESTAMP":
                     return typeof(DateTime);
+                case "DATETIMEOFFSET":
+                    return typeof(DateTimeOffset);
                 case "DECIMAL":
                     return typeof(decimal);
                 case "FLOAT":
@@ -107,6 +109,7 @@ namespace Skele.Interop.SqlServer
                 case "INTEGER":
                 case "SMALLINT":
                     return typeof(int);
+                case "HIERARCHYID":
                 case "NVARCHAR":
                 case "VARBINARY":
                 case "VARCHAR":

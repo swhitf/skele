@@ -83,8 +83,8 @@ namespace Skele.Core
                     x => x.Name,
                     x => new Dictionary<string, string>
                     {
-                        { "Driver", x.DriverName },
-                        { "Connection", x.ConnectionString },
+                        { "driver", x.DriverName },
+                        { "connection", x.ConnectionString },
                     });
             }
 
@@ -108,8 +108,8 @@ namespace Skele.Core
 
                     proj.Targets.Add(new ProjectTarget(
                         entry.Key, 
-                        values["Driver"],
-                        values["Connection"]));
+                        values["driver"],
+                        values["connection"]));
                 }
 
                 return proj;

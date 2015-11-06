@@ -73,7 +73,8 @@ namespace Skele
 
                 input.Map<InitCommand>("init");
 
-                input.Map<ExecuteCommand>("execute");
+                input.Map<ExecuteCommand>("execute")
+                    .Arg(0, (x, v) => x.FilePath = v);
 
                 input.Map<ExportCommand>("export")
                     .ValueSwitch("sv", (x, v) => x.SourceVersion = Version.Parse(v))
@@ -156,10 +157,16 @@ namespace Skele
                 .Exported(x => x.As<ICommandContext>())
                 .OnActivated(DecorateCommandContext);
 
-            //Register extensions
+            //Register version strategy
             composer
-                .RegisterComposablePartCatalog(new DirectoryCatalog(
-                    Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "ext")));
+                .RegisterType<DefaultVersionStrategy>()
+                .As<IVersionStrategy>()
+                .Exported(x => x.As<IVersionStrategy>());
+
+            //Register extensions
+            //composer
+            //    .RegisterComposablePartCatalog(new DirectoryCatalog(
+            //        Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "ext")));
 
             return composer.Build();
         }

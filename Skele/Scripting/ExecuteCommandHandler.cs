@@ -22,11 +22,11 @@ namespace Skele.Scripting
         {
             var session = Context.GetDatabaseSession();
             var metadata = session.Describe();
-            var engine = new Engine();
+            var engine = new JavaScriptEngine();
 
             foreach (var table in metadata.Tables)
             {
-                engine.SetValue(table.Name, new TableAdapter(engine, session, table));
+                engine.Set(table.Name, new TableAdapter(session, table));
             }
 
             var source = File.ReadAllText(input.FilePath);

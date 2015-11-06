@@ -10,10 +10,13 @@ namespace Skele.Migration
     class ExportCommandHandler : CommandHandlerBase<ExportCommand>
     {
         private PackageFactory packages;
-        public ExportCommandHandler(ICommandContext context, PackageFactory packages)
+        private IVersionStrategy versioning;
+
+        public ExportCommandHandler(ICommandContext context, PackageFactory packages, IVersionStrategy versioning)
             : base(context)
         {
             this.packages = packages;
+            this.versioning = versioning;
         }
 
         public override int Execute(ExportCommand input)
@@ -23,7 +26,7 @@ namespace Skele.Migration
             var proj = Context.Project;
 
             var pkg = packages.Create(proj.Location ?? Environment.CurrentDirectory);
-
+            
             if (sv == null)
             {
                 sv = new Version(0, 0, 0, 0);
@@ -45,24 +48,29 @@ namespace Skele.Migration
 
             Log.WriteLine("Found {0} migrations.", plan.Migrations.Count);
 
-            foreach (var migration in plan)
+            if (plan.Any())
             {
-                Log.WriteLine("Exporting {0}:", migration.Target);
+                versioning.PreScript(Output);
 
-                foreach (var resource in migration)
+                foreach (var migration in plan)
                 {
-                    Log.WriteLine("  {0}", resource.Name);
+                    Log.WriteLine("Exporting {0}:", migration.Target);
 
-                    Output.WriteLine("PRINT '{0}'", resource.Name);
-                    Output.WriteLine(resource.ReadFull());
-                    Output.WriteLine("GO");
+                    versioning.PreMigration(Output, migration);
+
+                    foreach (var resource in migration)
+                    {
+                        Log.WriteLine("  {0}", resource.Name);
+
+                        Output.WriteLine("PRINT '{0}'", resource.Name);
+                        Output.WriteLine(resource.ReadFull());
+                        Output.WriteLine("GO");
+                    }
+
+                    versioning.PostMigration(Output, migration);
                 }
 
-                Output.WriteLine("INSERT INTO __Version(Major, Minor, Patch), InstallDate)");
-                Output.WriteLine("VALUES({0}, {1}, {2}, GETUTCDATE())",
-                    migration.Target.Major,
-                    migration.Target.Minor,
-                    migration.Target.Revision);
+                versioning.PostScript(Output);
             }
 
             return SuccessResult();

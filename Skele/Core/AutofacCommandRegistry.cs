@@ -9,20 +9,21 @@ namespace Skele.Core
 {
     class AutofacCommandRegistry : ICommandRegistry
     {
-        private IContainer container;
-        public AutofacCommandRegistry(IContainer container)
+        private IComponentContext context;
+
+        public AutofacCommandRegistry(IComponentContext context)
         {
-            this.container = container;
+            this.context = context;
         }
 
         public ICommandHandler<T> ResolveHandler<T>() where T : ICommand
         {
-            return container.Resolve<ICommandHandler<T>>();
+            return context.Resolve<ICommandHandler<T>>();
         }
 
         public bool Contains<T>() where T : ICommand
         {
-            return container.IsRegistered<ICommandHandler<T>>();
+            return context.IsRegistered<ICommandHandler<T>>();
         }
     }
 }
