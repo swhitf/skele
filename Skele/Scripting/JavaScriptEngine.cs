@@ -37,6 +37,7 @@ namespace Skele.Scripting
         private Jint.Engine CreateJint()
         {
             var jint = new Jint.Engine(x => x.Strict(true));
+            jint.SetValue("format", new Func<string, object[], string>(Format));
             jint.SetValue("require", new Func<string, JsValue>(Require));
 
             foreach (var item in rootObjects)
@@ -46,6 +47,11 @@ namespace Skele.Scripting
 
             jint.SetValue("console", new ConsoleAdapter());
             return jint;
+        }
+
+        private string Format(string format, object[] args)
+        {
+            return String.Format(format, args);
         }
 
         private JsValue Require(string filePath)

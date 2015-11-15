@@ -1,6 +1,6 @@
-﻿exports = function () {
+﻿exports = function (seed) {
 
-    var id = 10000;
+    var id = seed || 1000;
     
     Default.For('.*\.Id', function (column) {
         console.dir(column);

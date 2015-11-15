@@ -1,6 +1,8 @@
-﻿require('defaults.js')();
+﻿require('defaults.js')(1200);
 
-TestData.add({
-    Name: 'steve',
-    Email: 'steve@gmail.com'
+TestData.generate(50, function (i) {
+    return {
+        Name: 'Steve #' + (i + 1),
+        Email: 'x'
+    };
 });

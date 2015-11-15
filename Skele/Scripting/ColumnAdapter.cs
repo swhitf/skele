@@ -16,7 +16,7 @@ namespace Skele.Scripting
             _column = column;
         }
 
-        public string DataType
+        public string dataType
         {
             get { return _column.DataType.Name; }
         }

@@ -1,4 +1,5 @@
 ﻿using Jint;
+using Jint.Native;
 using Skele.Interop;
 using Skele.Interop.MetaModel;
 using System;
@@ -7,7 +8,6 @@ using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Bag = System.Collections.Generic.IDictionary<string, object>;
 
 namespace Skele.Scripting
 {
@@ -24,7 +24,7 @@ namespace Skele.Scripting
             _defaults = defaults;
         }
 
-        public Bag add(Bag data)
+        public ExpandoObject add(ExpandoObject data)
         {
             ApplyDefaults(data);
 
@@ -35,7 +35,7 @@ namespace Skele.Scripting
             return data;
         }
 
-        public Bag[] addMany(Bag[] objects)
+        public ExpandoObject[] addMany(ExpandoObject[] objects)
         {
             foreach (var data in objects)
             {
@@ -45,9 +45,9 @@ namespace Skele.Scripting
             return objects;
         }
 
-        public Bag[] generate(int count, Func<int, Bag> generator)
+        public ExpandoObject[] generate(int count, Func<int, ExpandoObject> generator)
         {
-            var objects = new List<Bag>();
+            var objects = new List<ExpandoObject>();
 
             for (int i = 0; i < count; i++)
             {
@@ -65,11 +65,13 @@ namespace Skele.Scripting
             _session.Execute(sql);
         }
 
-        private void ApplyDefaults(Bag data)
+        private void ApplyDefaults(ExpandoObject data)
         {
+            var dataDict = (IDictionary<string, object>)data;
+
             foreach (var column in _table.Columns)
             {
-                if (data.ContainsKey(column.Name))
+                if (dataDict.ContainsKey(column.Name))
                     continue;
 
                 var key = $"{_table.Name}.{column.Name}";
@@ -78,7 +80,7 @@ namespace Skele.Scripting
                 {
                     if (entry.Pattern.IsMatch(key))
                     {
-                        data[column.Name] = entry.Callback(new ColumnAdapter(column));
+                        dataDict[column.Name] = entry.Callback(new ColumnAdapter(column));
                     }
                 }
             }
