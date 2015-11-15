@@ -8,5 +8,6 @@ namespace Skele.Scripting
 {
     public interface IScriptContext
     {
+        IList<Object> NewNativeList();
     }
 }

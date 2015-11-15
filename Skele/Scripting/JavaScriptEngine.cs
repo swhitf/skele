@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Jint.Native;
 using Jint.Parser;
+using System.IO;
 
 namespace Skele.Scripting
 {
@@ -20,15 +21,7 @@ namespace Skele.Scripting
 
         public void Execute(string source)
         {
-            var engine = new Jint.Engine(x => x.Strict(true));
-
-            foreach (var item in rootObjects)
-            {
-                engine.SetValue(item.Key, item.Value);
-            }
-
-            engine.SetValue("console", JavaScriptObjectBinder.Create(new ConsoleAdapter(), this));
-            engine.Execute(source);
+            CreateJint().Execute(source);
         }
 
         public IScriptContext GetExecutingContext()
@@ -39,6 +32,31 @@ namespace Skele.Scripting
         public void Set(string name, Object obj)
         {
             rootObjects[name] = obj;
+        }
+
+        private Jint.Engine CreateJint()
+        {
+            var jint = new Jint.Engine(x => x.Strict(true));
+            jint.SetValue("require", new Func<string, JsValue>(Require));
+
+            foreach (var item in rootObjects)
+            {
+                jint.SetValue(item.Key, item.Value);
+            }
+
+            jint.SetValue("console", new ConsoleAdapter());
+            return jint;
+        }
+
+        private JsValue Require(string filePath)
+        {
+            var source = File.ReadAllText(filePath);
+            var jint = CreateJint();
+
+            jint.Execute("var exports = {};");
+            jint.Execute(source);
+            
+            return jint.GetValue("exports");
         }
     }
 }

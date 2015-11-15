@@ -56,13 +56,13 @@ namespace Skele.Migration
                 .Insert("__Version")
                 .Data(new
                 {
-                    Major = version.Major,
-                    Minor = version.Minor,
-                    Revision = version.Revision,
+                    Major = Clamp(version.Major),
+                    Minor = Clamp(version.Minor),
+                    Patch = Clamp(version.Revision),
                     InstallDate = DateTime.UtcNow,
                 })
                 .ToSql();
-            Console.WriteLine(sql);
+
             session.Execute(sql);
         }
         
@@ -83,6 +83,11 @@ namespace Skele.Migration
             }
 
             return version;
+        }
+
+        private int Clamp(int x)
+        {
+            return x < 0 ? 0 : x;
         }
     }
 }

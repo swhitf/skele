@@ -8,5 +8,9 @@ namespace Skele.Scripting
 {
     class JavaScriptContext : IScriptContext
     {
+        public IList<object> NewNativeList()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

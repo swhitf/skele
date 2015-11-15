@@ -6,17 +6,11 @@ using System.Threading.Tasks;
 
 namespace Skele.Interop.MetaModel
 {
-    public class TableDescriptor : Descriptor
+    public class PrimaryKeyDescriptor
     {
-        public TableDescriptor()
+        public PrimaryKeyDescriptor()
         {
             Columns = new DescriptorCollection<ColumnDescriptor>();
-        }
-
-        public PrimaryKeyDescriptor PrimaryKey
-        {
-            get;
-            set;
         }
 
         public DescriptorCollection<ColumnDescriptor> Columns

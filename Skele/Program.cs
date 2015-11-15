@@ -35,6 +35,7 @@ namespace Skele
         {
             projectLocationParam = Environment.CurrentDirectory;
             projectTargetParam = "default";
+            logWriter = Console.Out;
         }
 
         private int Run(string[] args)

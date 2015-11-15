@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,10 +9,29 @@ namespace Skele.Scripting
 {
     public class ConsoleAdapter
     {
-        [ScriptExport("log")]
-        public void Log(IScriptContext context, string output)
+        public ConsoleAdapter()
+        {
+        }
+
+        public void log(string output)
         {
             Console.WriteLine(output);
+        }
+
+        public string prompt(string message)
+        {
+            Console.WriteLine(message);
+            return Console.ReadLine();
+        }
+
+        public void dir(Object obj)
+        {
+            var settings = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented
+            };
+
+            log(JsonConvert.SerializeObject(obj, settings));
         }
     }
 }

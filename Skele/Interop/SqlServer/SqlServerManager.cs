@@ -26,7 +26,7 @@ namespace Skele.Interop.SqlServer
             {
                 throw new DatabaseException("Cannot create database because the name it already exists: " + databaseName);
             }
-
+            
             var server = new SmoServer(connString.DataSource);
             var database = new SmoDatabase(server, databaseName);
             database.Create();
