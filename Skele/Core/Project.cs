@@ -14,12 +14,14 @@ namespace Skele.Core
         public Project()
         {
             Targets = new ProjectTargetCollection();
+            MigrationsPath = "Migrations";
+            ScriptsPath = "Scripts";
+            SnapshotsPath = "Snapshots";
         }
 
-        public string Name
+        public ProjectTarget DefaultTarget
         {
-            get;
-            set;
+            get { return Targets["default"]; }
         }
 
         public string Location
@@ -29,6 +31,18 @@ namespace Skele.Core
         }
 
         public string MigrationsPath
+        {
+            get;
+            set;
+        }
+
+        public string Name
+        {
+            get;
+            set;
+        }
+
+        public string ScriptsPath
         {
             get;
             set;
@@ -44,11 +58,6 @@ namespace Skele.Core
         {
             get;
             private set;
-        }
-
-        public ProjectTarget DefaultTarget
-        {
-            get { return Targets["default"]; }
         }
 
         public static Project Load(string path)

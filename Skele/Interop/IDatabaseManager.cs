@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Skele.Interop
 {
-    public interface IDatabaseManager
+    public interface IDatabaseManager : IDisposable
     {
         SqlBuilder BuildSql();
 

@@ -11,6 +11,8 @@ namespace Skele.Interop
 {
     public interface IDatabaseSession
     {
+        ISqlDialect Dialect { get; }
+
         SqlBuilder Build();
 
         void CreateTable(TableDescriptor table);

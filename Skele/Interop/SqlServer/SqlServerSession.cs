@@ -16,18 +16,24 @@ namespace Skele.Interop.SqlServer
 {
     class SqlServerSession : IDatabaseSession
     {
-        private string databaseName;
         private string connString;
-
+        private string databaseName;
         public SqlServerSession(string databaseName, string connString)
         {
             this.databaseName = databaseName;
             this.connString = connString;
+
+            Dialect = new SqlServerDialect();
+        }
+
+        public ISqlDialect Dialect
+        {
+            get;
         }
 
         public SqlBuilder Build()
         {
-            return new SqlBuilder(new SqlServerDialect());
+            return new SqlBuilder(Dialect);
         }
 
         public void CreateTable(TableDescriptor tableSpec)

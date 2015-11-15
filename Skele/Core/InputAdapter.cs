@@ -7,14 +7,13 @@ using System.Threading.Tasks;
 
 namespace Skele.Core
 {
-    class InputAdapter<TDispatcher> 
-        where TDispatcher : ICommandDispatcher
+    class InputAdapter
     {
-        private TDispatcher dispatcher;
+        private ICommandDispatcher dispatcher;
         private Dictionary<string, IAdapterTransform> commandTransforms;
         private List<IAdapterTransform> filterTransforms;
 
-        public InputAdapter(TDispatcher dispatcher)
+        public InputAdapter(ICommandDispatcher dispatcher)
         {
             this.dispatcher = dispatcher;
 
@@ -37,7 +36,7 @@ namespace Skele.Core
             return ct;
         }
 
-        public InputTransform<TDispatcher> Filter()            
+        public InputTransform<ICommandDispatcher> Filter()            
         {
             var ct = new FilterTransform(dispatcher);
             filterTransforms.Add(ct);
@@ -75,9 +74,9 @@ namespace Skele.Core
             where TCommand : ICommand
         {
             private Func<TCommand> factory;
-            private TDispatcher dispatcher;
+            private ICommandDispatcher dispatcher;
 
-            public CommandTransform(Func<TCommand> factory, TDispatcher dispatcher)
+            public CommandTransform(Func<TCommand> factory, ICommandDispatcher dispatcher)
             {
                 this.factory = factory;
                 this.dispatcher = dispatcher;
@@ -120,11 +119,11 @@ namespace Skele.Core
             }
         }
     
-        private class FilterTransform : InputTransform<TDispatcher>, IAdapterTransform
+        private class FilterTransform : InputTransform<ICommandDispatcher>, IAdapterTransform
         {
-            private TDispatcher dispatcher;
+            private ICommandDispatcher dispatcher;
 
-            public FilterTransform(TDispatcher dispatcher)
+            public FilterTransform(ICommandDispatcher dispatcher)
             {
                 this.dispatcher = dispatcher;
             }

@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Skele.Interop
+namespace Skele.Scripting
 {
-    public interface IDatabaseManagerFactory
+    public interface IScriptContext
     {
-        IDatabaseManager Create(string connectionString);
+        IList<Object> NewNativeList();
     }
 }

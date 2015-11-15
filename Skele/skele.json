@@ -1,0 +1,14 @@
+{
+  "version": 1.0,
+  "project": {
+    "name": "Test",
+    "migrationsPath": "Migrations",
+    "snapshotsPath": "Snapshots",
+    "targets": {
+      "default": {
+        "driver": "SqlServer",
+        "connection": "Data Source=.\\SQLEXPRESS;Initial Catalog=Test;Integrated Security=True;"
+      }
+    }
+  }
+}

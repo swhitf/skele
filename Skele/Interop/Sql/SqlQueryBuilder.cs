@@ -17,9 +17,41 @@ namespace Skele.Interop.Sql
             Table = table;
             ColumnList = new List<string>();
             OrderList = new List<string>();
+
+            JoinList = new List<JoinEntry>();
         }
 
         protected List<string> ColumnList
+        {
+            get;
+            set;
+        }
+
+        protected ISqlDialect Dialect
+        {
+            get;
+            set;
+        }
+
+        protected bool DistinctOnly
+        {
+            get;
+            set;
+        }
+
+        protected string FilterClause
+        {
+            get;
+            set;
+        }
+
+        protected List<JoinEntry> JoinList
+        {
+            get;
+            set;
+        }
+
+        protected int LimitAmount
         {
             get;
             set;
@@ -37,33 +69,59 @@ namespace Skele.Interop.Sql
             set;
         }
 
-        protected ISqlDialect Dialect
-        {
-            get;
-            set;
-        }
-
-        protected int LimitAmount
-        {
-            get;
-            set;
-        }
-
-        protected bool DistinctOnly
-        {
-            get;
-            set;
-        }
-
         public SqlQueryBuilder Distinct()
         {
             DistinctOnly = true;
             return this;
         }
 
-        public SqlQueryBuilder SelectAll()
+        public SqlQueryBuilder Filter(Func<SqlWhereBuilder, SqlClauseBuilder> whereCallback)
         {
-            ColumnList.Add("*");
+            FilterClause = whereCallback(new SqlWhereBuilder()).ToSql();
+            return this;
+        }
+
+        public SqlQueryBuilder InnerJoin(string table, Func<SqlOnBuilder, SqlClauseBuilder> onCallback)
+        {
+            return Join("INNER", table, onCallback);
+        }
+
+        public SqlQueryBuilder LeftJoin(string table, Func<SqlOnBuilder, SqlClauseBuilder> onCallback)
+        {
+            return Join("LEFT", table, onCallback);
+        }
+
+        public SqlQueryBuilder RightJoin(string table, Func<SqlOnBuilder, SqlClauseBuilder> onCallback)
+        {
+            return Join("RIGHT", table, onCallback);
+        }
+
+        protected SqlQueryBuilder Join(string type, string table, Func<SqlOnBuilder, SqlClauseBuilder> onCallback)
+        {
+            JoinList.Add(new JoinEntry
+            {
+                Condition = onCallback(new SqlOnBuilder()).ToSql(),
+                Table = table,
+                Type = type,
+            });
+
+            return this;
+        }
+
+        public SqlQueryBuilder Limit(int value)
+        {
+            LimitAmount = value;
+            return this;
+        }
+
+        public SqlQueryBuilder OrderBy(params string[] columns)
+        {
+            return OrderBy((IEnumerable<string>)columns);
+        }
+
+        public SqlQueryBuilder OrderBy(IEnumerable<string> columns)
+        {
+            OrderList.AddRange(columns);
             return this;
         }
 
@@ -73,14 +131,33 @@ namespace Skele.Interop.Sql
             return this;
         }
 
+        public SqlQueryBuilder SelectAll()
+        {
+            ColumnList.Add("*");
+            return this;
+        }
+
         public override string ToSql()
         {
             var sql = new StringBuilder();
             sql.Append("SELECT");
-            sql.Append(DistinctOnly ? "" : " DISTINCT");
+            sql.Append(DistinctOnly ? " DISTINCT" : "");
             sql.Append(LimitAmount < 1 ? "" : " TOP " + LimitAmount);
             sql.AppendFormat(" {0}", string.Join(", ", SanitizedColumnList(ColumnList, " AS ").Distinct()));
             sql.AppendFormat(" FROM {0}", Dialect.EscapeObjectName(Table));
+
+            foreach (var join in JoinList)
+            {
+                sql.AppendFormat(" {0} JOIN {1} {2}",
+                    join.Type,
+                    Dialect.EscapeObjectName(join.Table),
+                    join.Condition);
+            }
+
+            if (!string.IsNullOrEmpty(FilterClause))
+            {
+                sql.Append(FilterClause);
+            }
 
             if (OrderList.Any())
             {
@@ -118,21 +195,11 @@ namespace Skele.Interop.Sql
             }
         }
 
-        public SqlQueryBuilder OrderBy(params string[] columns)
+        protected class JoinEntry
         {
-            return OrderBy((IEnumerable<string>)columns);
-        }
-
-        public SqlQueryBuilder OrderBy(IEnumerable<string> columns)
-        {
-            OrderList.AddRange(columns);
-            return this;
-        }
-
-        public SqlQueryBuilder Limit(int value)
-        {
-            LimitAmount = value;
-            return this;
+            public string Condition;
+            public string Table;
+            public string Type;
         }
     }
 }

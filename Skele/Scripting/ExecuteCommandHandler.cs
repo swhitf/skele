@@ -20,25 +20,21 @@ namespace Skele.Scripting
 
         public override int Execute(ExecuteCommand input)
         {
-            var session = GetDatabaseSession();
+            var session = Context.GetDatabaseSession();
             var metadata = session.Describe();
-            var engine = new Engine();
+            var engine = new JavaScriptEngine();
+
+            var defaults = new Defaults();
+            engine.Set("Default", new DefaultsAdapter(defaults));
+            engine.Set("Session", new SessionAdapter(session));
 
             foreach (var table in metadata.Tables)
             {
-                engine.SetValue(table.Name, new TableAdapter(engine, session, table));
+                engine.Set(table.Name, new TableAdapter(session, table, defaults));
             }
 
             var source = File.ReadAllText(input.FilePath);
             engine.Execute(source);
-
-            //Jint.Runtime.Interop.DefaultTypeConverter
-            //var engine = new Engine();
-            //var result = engine
-            //    .
-            //    .Execute("1 + 1")
-            //    .GetCompletionValue()
-            //    .AsNumber();
 
             return SuccessResult();
         }

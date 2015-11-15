@@ -11,10 +11,13 @@ namespace Skele.Migration
     class PrepareCommandHandler : CommandHandlerBase<PrepareCommand>
     {
         private const string PREP_MSG = "The specified directory is not empty, are you sure you want to prepare your project here?";
+        
+        private IPresenter presenter;
 
-        public PrepareCommandHandler(ICommandContext context)
+        public PrepareCommandHandler(ICommandContext context, IPresenter presenter)
             : base(context)
         {
+            this.presenter = presenter;
         }
 
         public override int Execute(PrepareCommand input)
@@ -32,28 +35,30 @@ namespace Skele.Migration
             }
 
             if ((dir.EnumerateFiles().Any() || dir.EnumerateDirectories().Any()) &&
-                !Presenter.Confirm(PREP_MSG))
+                !presenter.Confirm(PREP_MSG))
             {
                 //User cancelled.
                 return CancelledResult();
             }
 
             var project = new Project();
-            project.Name = Presenter.Prompt("Enter a project name:");
+            project.Name = presenter.Prompt("Enter a project name:");
 
-            if (Presenter.Confirm("Do you want to use the default project structure?"))
+            if (presenter.Confirm("Do you want to use the default project structure?"))
             {
                 project.MigrationsPath = "Migrations";
                 project.SnapshotsPath = "Snapshots";
             }
             else
             {
-                project.MigrationsPath = Presenter.Prompt("Enter the migrations folder path:");
-                project.SnapshotsPath = Presenter.Prompt("Enter the snapshots folder path:");
+                project.MigrationsPath = presenter.Prompt("Enter the migrations folder path:");
+                project.SnapshotsPath = presenter.Prompt("Enter the snapshots folder path:");
             }
 
             project.Targets.Add(new ProjectTarget(
-                "default", Presenter.Prompt("Enter the default target connection string:")));
+                "default", 
+                presenter.Prompt("Enter the default target driver name:"),
+                presenter.Prompt("Enter the default target connection string:")));
 
             new ProjectSerializer().Serialize(
                 project, Path.Combine(dir.FullName, Project.DEFAULT_FILE));

@@ -19,6 +19,12 @@ namespace Skele.Interop.MetaModel
             set;
         }
 
+        public PrimaryKeyDescriptor PrimaryKey
+        {
+            get;
+            set;
+        }
+
         public DescriptorCollection<ColumnDescriptor> Columns
         {
             get;

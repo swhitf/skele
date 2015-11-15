@@ -80,13 +80,19 @@ namespace Skele.Core
                 MigrationsPath = project.MigrationsPath;
                 SnapshotsPath = project.SnapshotsPath;
                 Targets = project.Targets.ToDictionary(
-                    x => x.Name, x => x.ConnectionString);
+                    x => x.Name,
+                    x => new Dictionary<string, string>
+                    {
+                        { "driver", x.DriverName },
+                        { "connection", x.ConnectionString },
+                    });
             }
 
             public string Name;
             public string MigrationsPath;
             public string SnapshotsPath;
-            public Dictionary<string, string> Targets;
+            public string ScriptsPath;
+            public Dictionary<string, Dictionary<string, string>> Targets;
 
             public Project ToProject()
             {
@@ -95,11 +101,17 @@ namespace Skele.Core
                     Name = Name,
                     MigrationsPath = MigrationsPath,
                     SnapshotsPath = SnapshotsPath,
+                    ScriptsPath= ScriptsPath,
                 };
 
                 foreach (var entry in Targets)
                 {
-                    proj.Targets.Add(new ProjectTarget(entry.Key, entry.Value));
+                    var values = entry.Value;
+
+                    proj.Targets.Add(new ProjectTarget(
+                        entry.Key, 
+                        values["driver"],
+                        values["connection"]));
                 }
 
                 return proj;

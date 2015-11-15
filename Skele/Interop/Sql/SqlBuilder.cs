@@ -21,6 +21,11 @@ namespace Skele.Interop.Sql
             set;
         }
 
+        public SqlTableBuilder CreateTable(string table)
+        {
+            return new SqlCreateTableBuilder(table);
+        }
+
         public SqlInsertBuilder Insert(string table)
         {
             return new SqlInsertBuilder(Dialect, table);
@@ -42,6 +47,11 @@ namespace Skele.Interop.Sql
         public SqlQueryBuilder Query(string table)
         {
             return new SqlQueryBuilder(Dialect, table);
+        }
+
+        public SqlDeleteBuilder Delete(string table)
+        {
+            return new SqlDeleteBuilder(Dialect, table);
         }
     }
 }
