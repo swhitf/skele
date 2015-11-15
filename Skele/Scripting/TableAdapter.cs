@@ -26,7 +26,7 @@ namespace Skele.Scripting
         public void add(IDictionary<string, Object> data)
         {
             var builder = session.Build();
-            var sql = builder.Insert(table.Name, data);
+            var sql = builder.Insert($"{table.Schema}.{table.Name}", data);
 
             session.Execute(sql);
         }

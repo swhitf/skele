@@ -13,6 +13,12 @@ namespace Skele.Interop.MetaModel
             Columns = new DescriptorCollection<ColumnDescriptor>();
         }
 
+        public string Schema
+        {
+            get;
+            set;
+        }
+
         public DescriptorCollection<ColumnDescriptor> Columns
         {
             get;

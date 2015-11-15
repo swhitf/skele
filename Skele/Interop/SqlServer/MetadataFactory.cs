@@ -41,6 +41,7 @@ namespace Skele.Interop.SqlServer
             var mapper = DataMapperFactory.Create(x => new TableDescriptor
             {
                 Name = x.String("TABLE_NAME"),
+                Schema = x.String("TABLE_SCHEMA"),
             });
 
             var tables = session.Query(sql, mapper).ToList();
